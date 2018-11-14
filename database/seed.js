@@ -1,20 +1,33 @@
 const faker = require('faker');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const homes = require('./models/Home');
 
-const fakeHomes = [];
-const rockvilleZipCodes = [20847, 20848, 20849, 20850, 20851, 20852, 20853, 20854, 20857, 20877];
+const csvWriter = createCsvWriter({
+  path: 'xyz.csv',
+  header: [
+    { id: 'date', title: 'DATE' },
+    { id: 'status', title: 'STATUS' },
+    { id: 'numberOfLikes', title: 'NUMBEROFLIKES' },
+    { id: 'numberOfBathrooms', title: 'NUMBEROFBATHROOMS' },
+    { id: 'numberOfBedrooms', title: 'NUMBEROFBEDROOMS' },
+    { id: 'homeValue', title: 'HOMEVALUE' },
+    { id: 'sqft', title: 'SQFT' },
+    { id: 'streetName', title: 'STREETNAME' },
+    { id: 'cityName', title: 'CITYNAME' },
+    { id: 'stateName', title: 'STATENAME' },
+    { id: 'zipCode', title: 'ZIPCODE' },
+    { id: 'homeImage', title: 'HOMEIMAGE' },
+  ],
+});
 
-const selectRandomElement = (array) => {
-  const randomIdx = Math.floor(Math.random() * array.length);
-  return array[randomIdx];
-};
+const fakeHomes = [];
 
 const createRandomNum = () => Math.floor(Math.random() * 20) + 1;
 
 const selectRandomPhoto = () => `https://s3-us-west-1.amazonaws.com/fcc-nearby-homes/assets/images/home_${createRandomNum()}.jpg`;
 
-const createFakeHomes = function createFakeHomes() {
-  for (let i = 0; i < 100; i += 1) {
+const createFakeHomes = function createFakeHomes(num) {
+  for (let i = 1; i < num + 1; i += 1) {
     const home = {
       dateOfPosting: faker.date.between('2018-05-01', '2018-10-25'),
       status: faker.random.arrayElement([
@@ -30,7 +43,7 @@ const createFakeHomes = function createFakeHomes() {
         min: 0,
         max: 4,
       }),
-      numberOfBedroom: faker.random.number({
+      numberOfBedrooms: faker.random.number({
         min: 0,
         max: 10,
       }),
@@ -43,18 +56,24 @@ const createFakeHomes = function createFakeHomes() {
         max: 4000,
       }),
       streetName: faker.address.streetAddress(),
-      cityName: 'Rockville',
-      stateName: 'MD',
-      zipCode: selectRandomElement(rockvilleZipCodes),
+      cityName: faker.address.city(),
+      stateName: faker.address.state(),
+      zipCode: faker.address.zipCode(),
       homeImage: selectRandomPhoto(),
     };
     fakeHomes.push(home);
   }
 };
 
-const seed = () => homes.sync({ force: true }).then(() => {
-  createFakeHomes();
-  homes.bulkCreate(fakeHomes);
-});
+createFakeHomes(100000);
 
-seed();
+csvWriter.writeRecords(fakeHomes)
+  .then(() => {
+    console.log('done');
+  });
+// const seed = () => homes.sync({ force: true }).then(() => {
+//   createFakeHomes();
+//   homes.bulkCreate(fakeHomes);
+// });
+
+// seed();
