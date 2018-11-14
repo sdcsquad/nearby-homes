@@ -1,8 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-const homes = require('./routes/api/homes');
+const homes = require('./routes/api/homes.js');
 
 const app = express();
 const port = process.env.PORT || 3003;
@@ -15,7 +16,7 @@ app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Use Router
 app.use('/nearbyHomes', homes);
-app.use('/api/homes', homes);
+app.use('/api/nearbyHomes', homes);
 
 app.listen(port, () => {
   console.log(`server is running at: http://localhost:${port}`);
