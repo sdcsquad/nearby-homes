@@ -2,7 +2,7 @@ const express = require('express');
 const Home = require('../../../database/models/Home');
 
 const router = express.Router();
-// const createRandomId = () => Math.floor(Math.random() * 100) + 1;
+const createRandomId = () => Math.floor(Math.random() * 100) + 1;
 
 /* for testing */
 router.get('/', (req, res) => {
@@ -24,10 +24,10 @@ router.get('/', (req, res) => {
 router.get('/:homeId', (req, res) => {
   let id;
   const homeIdString = req.params.homeId.toString();
-  if (homeIdString.slice(0, 4) === 'home') {
-    if (Number.parseInt(homeIdString.slice(4), 10) > 0
-      && Number.parseInt(homeIdString.slice(4), 10) <= 10000001) {
-      id = Number.parseInt(homeIdString.slice(4), 10);
+  if (homeIdString.slice(0, 4).toLowerCase() === 'home') {
+    const homeIdNum = Number.parseInt(homeIdString.slice(4), 10);
+    if (homeIdNum > 0 && homeIdNum <= 10000001) {
+      id = homeIdNum;
     } else {
       id = null;
     }
@@ -53,16 +53,28 @@ router.get('/:homeId', (req, res) => {
   });
 });
 
-router.post('/:homeId', (req, res) => {
-  res.status(405).send('Can\t POST to this route');
+router.post('/', (req, res) => {
+  const { body } = { body: req.body };
+  Home.create(body)
+    .then(() => {
+      res.status(200);
+    });
 });
 
 router.put('/:homeId', (req, res) => {
-  res.status(405).send('Can\t PUT to this route');
+  const { body } = { body: req.body };
+  Home.update(body, { where: { id: req.params.homeId } })
+    .then(() => {
+      res.status(200);
+    });
 });
 
 router.delete('/:homeId', (req, res) => {
-  res.status(405).send('Can\t DELETE from this route');
+  const { homeId } = req.params.homeId;
+  Home.destroy({ where: { id: homeId } })
+    .then(() => {
+      res.status(200);
+    });
 });
 
 module.exports = router;
