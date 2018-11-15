@@ -61,9 +61,9 @@ This project is [Jest](https://mochajs.org) and [Enzyme](https://airbnb.io/enzym
 ## API Documentation
 
 ##### Public End Points
-| Description                           | Endpoint                           |
-| ------------------------------------- | ---------------------------------- |
-| Get info of nearby homes of a home    | GET `/api/nearbyHomes/:homeId`     |
-| Add a nearby home                     | POST `/api/nearbyHomes/`           |
-| Update info of a nearby home by ID    | PUT `/api/nearbyHomes/:homeId`     |
-| Delete a nearby home by ID            | DELETE `/api/nearbyHomes/:homeId`  |
+| Description                           | Method | Endpoint                    |
+| ------------------------------------- | ------ | --------------------------- |
+| Get info of nearby homes of a home    | GET    | `/api/nearbyHomes/:homeId`  |
+| Add a nearby home                     | POST   | `/api/nearbyHomes/`         |
+| Update info of a nearby home by ID    | PUT    | `/api/nearbyHomes/:homeId`  |
+| Delete a nearby home by ID            | DELETE | `/api/nearbyHomes/:homeId`  |
