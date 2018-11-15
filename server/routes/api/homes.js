@@ -70,8 +70,8 @@ router.put('/:homeId', (req, res) => {
 });
 
 router.delete('/:homeId', (req, res) => {
-  const { body } = { body: req.body };
-  Home.destroy({ where: { id: body.id } })
+  const { homeId } = req.params.homeId;
+  Home.destroy({ where: { id: homeId } })
     .then(() => {
       res.status(200);
     });
