@@ -2,7 +2,7 @@ const express = require('express');
 const Home = require('../../../database/models/Home');
 
 const router = express.Router();
-// const createRandomId = () => Math.floor(Math.random() * 100) + 1;
+const createRandomId = () => Math.floor(Math.random() * 100) + 1;
 
 /* for testing */
 router.get('/', (req, res) => {
@@ -53,7 +53,7 @@ router.get('/:homeId', (req, res) => {
   });
 });
 
-router.post('/:homeId', (req, res) => {
+router.post('/', (req, res) => {
   const { body } = { body: req.body };
   Home.create(body)
     .then(() => {
@@ -63,7 +63,7 @@ router.post('/:homeId', (req, res) => {
 
 router.put('/:homeId', (req, res) => {
   const { body } = { body: req.body };
-  Home.update(body, { where: { id: body.id } })
+  Home.update(body, { where: { id: req.params.homeId } })
     .then(() => {
       res.status(200);
     });
