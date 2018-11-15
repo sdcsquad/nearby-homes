@@ -25,3 +25,4 @@ build/
 dist/
 # database/index.js
 
+.env
