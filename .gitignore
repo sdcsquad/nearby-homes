@@ -24,4 +24,6 @@ coverage
 build/
 dist/bundle.js
 
-.env
+*.env
+*.tsv
+*.csv

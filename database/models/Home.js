@@ -5,6 +5,7 @@ module.exports = db.define('homes', {
   home_id: {
     type: Sequelize.INTEGER,
     allowNull: false,
+    primaryKey: true,
   },
   home_name: {
     type: Sequelize.STRING,
