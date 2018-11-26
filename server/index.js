@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Use Router
-app.use('/nearbyHomes', homes);
+// app.use('/nearbyHomes', homes);
 app.use('/api/nearbyHomes', homes);
 
 app.listen(port, () => {

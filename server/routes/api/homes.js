@@ -1,29 +1,9 @@
 const express = require('express');
 const cassandra = require('cassandra-driver');
-const Home = require('../../../database/models/Home');
 
 const { PlainTextAuthProvider } = cassandra.auth;
-const client = new cassandra.Client({ contactPoints: ['127.0.0.1:9042'], authProvider: new PlainTextAuthProvider('cassandra', 'cassandra') });
+const client = new cassandra.Client({ contactPoints: ['127.0.0.1'], keyspace: 'neighborhood', authProvider: new PlainTextAuthProvider('cassandra', 'cassandra') });
 const router = express.Router();
-const createRandomId = () => Math.floor(Math.random() * 100) + 1;
-
-/* for testing
-router.get('/', (req, res) => {
-  Home.findByPk(1).then((home) => {
-    if (!home) {
-      return res.status(404).json({ noHomeFound: 'No home found with that ID' });
-    }
-    const { zipCode } = home;
-    Home.findAll({ where: { zipCode } }).then((homes) => {
-      if (!homes) {
-        return res.status(404).json({ noHomesFound: 'no homes found with that ZIP Code' });
-      }
-      return res.status(200).send(homes);
-    });
-    return false;
-  });
-});
-*/
 
 router.get('/:homeId', (req, res) => {
   let id;
@@ -41,67 +21,103 @@ router.get('/:homeId', (req, res) => {
   } else {
     id = null;
   }
-  // const randomId = createRandomId();
-  const query = `SELECT * FROM neighborhood.homes where home_id=${id}`;
-  client.execute(query)
-    .then((result) => {
-      // console.log(result.rows[0]);
-      const singleHome = result.rows[0];
-      const query2 = `SELECT * FROM neighborhood.homes WHERE zipcode=${singleHome.zipcode}`;
-      client.execute(query2)
-        .then((newResult) => {
-          const arr = [];
-          let i = 0;
-          while (i < 5) {
-            if (newResult.rows[i].home_id !== id) {
-              arr.push(newResult.rows[i]);
-              i += 1;
+  if (id !== null) {
+    const query = 'SELECT * FROM neighborhood.homes where home_id = ?';
+    client.execute(query, [id], { prepare: true })
+      .then((result) => {
+        const singleHome = result.rows[0];
+        const query2 = 'SELECT * FROM neighborhood.homes WHERE zipcode = ?';
+        client.execute(query2, [singleHome.zipcode], { prepare: true })
+          .then((newResult) => {
+            const arr = [];
+            for (let i = 0; i < 5; i += 1) {
+              if (newResult.rows[i].home_id !== id) {
+                arr.push(newResult.rows[i]);
+              }
             }
-          }
-          if (arr.length <= 1) {
-            res.status(404).json({ noHomeFound: 'No home found with that ID' });
-          } else {
-            res.status(200).json(arr);
-          }
-        });
-    });
-  // Home.findByPk(id).then((home) => {
-  //   if (!home) {
-  //     return res.status(404).json({ noHomeFound: 'No home found with that ID' });
-  //   }
-  //   const { zipCode } = home;
-  //   Home.findAll({ where: { zipCode }, exclude: [{ id }] }).then((homes) => {
-  //     if (!homes) {
-  //       return res.status(404).json({ noHomesFound: 'no homes found with that ZIP Code' });
-  //     }
-  //     return res.status(200).json(homes);
-  //   });
-  //   return false;
-  // });
+            if (arr.length <= 1) {
+              res.status(404).json({ noHomeFound: 'No home found with that ID' });
+            } else {
+              res.status(200).json(arr);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else {
+    res.status(404).json('No home found with that ID');
+  }
 });
 
 router.post('/', (req, res) => {
   const { body } = { body: req.body };
-  Home.create(body)
-    .then(() => {
-      res.status(200);
-    });
+  const query = `INSERT INTO neighborhood.homes(home_id, home_name, dateOfPosting, status, numberOfLikes, numberOfBathroom, numberOfBedroom, homeValue, sqft, streetName, cityName, stateName, zipCode, homeImage) VALUES (${body.home_id}, ${body.home_name}, ${body.dateOfPosting}, ${body.status}, ${body.numberOfLikes}, ${body.numberOfBathroom}, ${body.numberOfBedroom}, ${body.homeValue}, ${body.sqft}, ${body.streetName}, ${body.cityName}, ${body.stateName}, ${body.zipCode}, ${body.homeImage})`;
+  client.execute(query).then(() => res.status(200));
 });
 
 router.put('/:homeId', (req, res) => {
   const { body } = { body: req.body };
-  Home.update(body, { where: { id: req.params.homeId } })
-    .then(() => {
-      res.status(200);
-    });
+  let id;
+  const homeIdString = req.params.homeId.toString();
+  if (homeIdString.slice(0, 4).toLowerCase() === 'home') {
+    const homeIdNum = Number.parseInt(homeIdString.slice(4), 10);
+    if (homeIdNum > 0 && homeIdNum <= 10000001) {
+      id = homeIdNum;
+    } else {
+      id = null;
+    }
+  } else if (Number.parseInt(req.params.homeId, 10) > 0
+    && Number.parseInt(req.params.homeId, 10) <= 10000002) {
+    id = Number.parseInt(req.params.homeId, 10);
+  } else {
+    id = null;
+  }
+  if (id === null) {
+    res.status(404).json('No home found with that ID');
+  }
+  const query = `UPDATE neighborhood.homes
+  SET home_name = ${body.home_name},
+  dateOfPosting = ${body.dateOfPosting},
+  status = ${body.status},
+  numberOfLikes = ${body.numberOfLikes},
+  numberOfBathroom = ${body.numberOfBathroom},
+  numberOfBedroom = ${body.numberOfBedroom},
+  homeValue = ${body.homeValue},
+  sqft = ${body.sqft},
+  streetName = ${body.streetName},
+  cityName = ${body.cityName},
+  stateName = ${body.stateName},
+  zipCode = ${body.zipCode},
+  homeImage = ${body.homeImage}
+  WHERE home_id = ${id}`;
+  client.execute(query).then(() => res.status(200));
 });
 
 router.delete('/:homeId', (req, res) => {
-  const { homeId } = req.params.homeId;
-  Home.destroy({ where: { id: homeId } })
-    .then(() => {
-      res.status(200);
-    });
+  let id;
+  const homeIdString = req.params.homeId.toString();
+  if (homeIdString.slice(0, 4).toLowerCase() === 'home') {
+    const homeIdNum = Number.parseInt(homeIdString.slice(4), 10);
+    if (homeIdNum > 0 && homeIdNum <= 10000001) {
+      id = homeIdNum;
+    } else {
+      id = null;
+    }
+  } else if (Number.parseInt(req.params.homeId, 10) > 0
+    && Number.parseInt(req.params.homeId, 10) <= 10000002) {
+    id = Number.parseInt(req.params.homeId, 10);
+  } else {
+    id = null;
+  }
+  if (id === null) {
+    res.status(404).json('No home found with that ID');
+  }
+  const query = `DELETE FROM neighborhood.homes WHERE home_id = ${id}`;
+  client.execute(query).then(() => res.status(200));
 });
 
 module.exports = router;

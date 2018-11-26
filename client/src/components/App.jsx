@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import * as path from 'path';
 import CollapsibleTitle from './CollapsibleTitle';
 import Carousel from './Carousel';
 
@@ -17,12 +18,15 @@ class App extends Component {
   }
 
   componentDidMount() {
-    axios.get('/nearbyHomes', {}).then((homes) => {
-      this.setState({
-        list: homes.data,
-        zipCode: homes.data[0].zipCode,
+    const location = window.location.href.split('/');
+    const id = location[location.length - 1];
+    axios.get(`/api/nearbyHomes/${id}`, {})
+      .then((homes) => {
+        this.setState({
+          list: homes.data,
+          zipCode: homes.data[0].zipCode,
+        });
       });
-    });
   }
 
   toggleCollapsibleTitle = () => {
