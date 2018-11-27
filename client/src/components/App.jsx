@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import * as path from 'path';
 import CollapsibleTitle from './CollapsibleTitle';
 import Carousel from './Carousel';
 
@@ -10,7 +9,7 @@ class App extends Component {
     this.state = {
       currIndex: 0,
       list: [],
-      zipCode: '',
+      zipcode: '',
       isExpanded: false,
       showPopup: false,
       clickedContent: '',
@@ -18,13 +17,13 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const location = window.location.href.split('/');
-    const id = location[location.length - 1];
+    const path = window.location.pathname.split('/');
+    const id = path[path.length - 2];
     axios.get(`/api/nearbyHomes/${id}`, {})
       .then((homes) => {
         this.setState({
           list: homes.data,
-          zipCode: homes.data[0].zipCode,
+          zipcode: homes.data[0].zipcode,
         });
       });
   }
@@ -37,12 +36,10 @@ class App extends Component {
   };
 
   handleContentCloseClick = () => {
-    const { showPopup } = this.state;
     this.setState({ showPopup: false });
   };
 
   handleContentClick = param => (e) => {
-    const { clickedContent, showPopup } = this.state;
     this.setState({
       clickedContent: param,
       showPopup: true,
@@ -63,7 +60,7 @@ class App extends Component {
 
   render() {
     const {
-      currIndex, isExpanded, showPopup, list, zipCode, clickedContent,
+      currIndex, isExpanded, showPopup, list, zipcode, clickedContent,
     } = this.state;
 
     return (
@@ -71,7 +68,7 @@ class App extends Component {
         <div className="collapsible-title-inner-layout">
           <CollapsibleTitle
             isExpanded={isExpanded}
-            zipCode={zipCode}
+            zipcode={zipcode}
             toggleCollapsibleTitle={this.toggleCollapsibleTitle}
           />
           {isExpanded ? (

@@ -23,23 +23,22 @@ router.get('/:homeId', (req, res) => {
   }
   if (id !== null) {
     const query = 'SELECT * FROM neighborhood.homes where home_id = ?';
-    client.execute(query, [id], { prepare: true })
+    return client.execute(query, [id], { prepare: true })
       .then((result) => {
         const singleHome = result.rows[0];
         const query2 = 'SELECT * FROM neighborhood.homes WHERE zipcode = ?';
         client.execute(query2, [singleHome.zipcode], { prepare: true })
           .then((newResult) => {
             const arr = [];
-            for (let i = 0; i < 5; i += 1) {
+            for (let i = 0; i < 15; i += 1) {
               if (newResult.rows[i].home_id !== id) {
                 arr.push(newResult.rows[i]);
               }
             }
             if (arr.length <= 1) {
-              res.status(404).json({ noHomeFound: 'No home found with that ID' });
-            } else {
-              res.status(200).json(arr);
+              return res.status(404).json({ noHomeFound: 'No home found with that ID' });
             }
+            return res.status(200).json(arr);
           })
           .catch((err) => {
             console.log(err);
@@ -48,9 +47,8 @@ router.get('/:homeId', (req, res) => {
       .catch((err) => {
         console.log(err);
       });
-  } else {
-    res.status(404).json('No home found with that ID');
   }
+  return res.status(404).json('No home found with that ID');
 });
 
 router.post('/', (req, res) => {
