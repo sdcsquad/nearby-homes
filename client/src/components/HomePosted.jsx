@@ -15,7 +15,7 @@ const HomePosted = ({ home }) => {
     <li className="photo-count">1 photo</li>
   ) : (
     <div className="home-posted-date">
-      {getPostedDateFromNow(home.dateofposting)} days on Zillow
+      {`${getPostedDateFromNow(home.dateofposting)} days on Zillow`}
     </div>
   );
 };

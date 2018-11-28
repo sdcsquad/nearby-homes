@@ -38,7 +38,7 @@ const Carousel = ({
                 return (
                   <Home
                     home={home}
-                    key={home.id}
+                    key={home.home_id}
                     showPopup={showPopup}
                     clickedContent={clickedContent}
                     handleContentClick={handleContentClick}
