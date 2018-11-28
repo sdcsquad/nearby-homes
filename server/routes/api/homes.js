@@ -55,7 +55,7 @@ router.get('/:homeId', (req, res) => {
 router.post('/', (req, res) => {
   const { body } = { body: req.body };
   const query = `INSERT INTO neighborhood.homes(home_id, home_name, dateOfPosting, status, numberOfLikes, numberOfBathroom, numberOfBedroom, homeValue, sqft, streetName, cityName, stateName, zipCode, homeImage) VALUES (${body.home_id}, ${body.home_name}, ${body.dateOfPosting}, ${body.status}, ${body.numberOfLikes}, ${body.numberOfBathroom}, ${body.numberOfBedroom}, ${body.homeValue}, ${body.sqft}, ${body.streetName}, ${body.cityName}, ${body.stateName}, ${body.zipCode}, ${body.homeImage})`;
-  client.execute(query).then(() => res.status(200));
+  client.execute(query).then(() => res.status(200)).catch(err => console.log(err));
 });
 
 router.put('/:homeId', (req, res) => {
@@ -79,7 +79,7 @@ router.put('/:homeId', (req, res) => {
   zipCode = ${body.zipCode},
   homeImage = ${body.homeImage}
   WHERE home_id = ${id}`;
-  client.execute(query).then(() => res.status(200));
+  client.execute(query).then(() => res.status(200)).catch(err => console.log(err));
 });
 
 router.delete('/:homeId', (req, res) => {
@@ -88,7 +88,7 @@ router.delete('/:homeId', (req, res) => {
     res.status(404).json('No home found with that ID');
   }
   const query = `DELETE FROM neighborhood.homes WHERE home_id = ${id}`;
-  client.execute(query).then(() => res.status(200));
+  client.execute(query).then(() => res.status(200)).catch(err => console.log(err));
 });
 
 module.exports = router;
