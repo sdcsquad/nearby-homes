@@ -13,7 +13,7 @@ const createRandomNum = () => padToThree(Math.floor(Math.random() * 99));
 
 const selectRandomPhoto = () => `https://s3-us-west-1.amazonaws.com/sdc-houses/${createRandomNum()}.jpg`;
 
-const wstream = fs.createWriteStream('homes1.tsv');
+const wstream = fs.createWriteStream('homes.tsv');
 
 // const header = {
 // home_id: 'HOME_ID',
@@ -34,7 +34,7 @@ const wstream = fs.createWriteStream('homes1.tsv');
 
 const createFakeHomes = function createFakeHomes(i) {
   /* eslint-disable */
-  for (; i < 1001; i += 1) {
+  for (; i < 10000003; i += 1) {
     const home_id = i;
     const home_name = `home${i}`;
     /* eslint-enable */
@@ -67,10 +67,10 @@ const createFakeHomes = function createFakeHomes(i) {
     const streetName = faker.address.streetAddress();
     const cityName = faker.address.city();
     const stateName = faker.address.state();
-    const zipCode = faker.address.zipCode();
+    const zipCode = faker.address.zipCode('#####');
     const homeImage = selectRandomPhoto();
     /* eslint-disable */
-    if (!wstream.write(`${home_id}\t${home_name}\t${dateOfPosting}\t${status}\t${numberOfLikes}\t${numberOfBathroom}\t${numberOfBedroom}\t${homeValue}\t${sqft}\t${streetName}\t${cityName}\t${stateName}\t${zipCode}\t${homeImage}\n`)) {
+    if (!wstream.write(`${home_id}\t${home_name}\t${dateOfPosting.toISOString()}\t${status}\t${numberOfLikes}\t${numberOfBathroom}\t${numberOfBedroom}\t${homeValue}\t${sqft}\t${streetName}\t${cityName}\t${stateName}\t${zipCode}\t${homeImage}\n`)) {
       wstream.once('drain', () => createFakeHomes(i + 1));
       /* eslint-enable */
       return;

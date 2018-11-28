@@ -9,7 +9,7 @@ class App extends Component {
     this.state = {
       currIndex: 0,
       list: [],
-      zipCode: '',
+      zipcode: '',
       isExpanded: false,
       showPopup: false,
       clickedContent: '',
@@ -17,12 +17,15 @@ class App extends Component {
   }
 
   componentDidMount() {
-    axios.get('/nearbyHomes', {}).then((homes) => {
-      this.setState({
-        list: homes.data,
-        zipCode: homes.data[0].zipCode,
+    const path = window.location.pathname.split('/');
+    const id = path[path.length - 2];
+    axios.get(`/api/nearbyHomes/${id}`, {})
+      .then((homes) => {
+        this.setState({
+          list: homes.data,
+          zipcode: homes.data[0].zipcode,
+        });
       });
-    });
   }
 
   toggleCollapsibleTitle = () => {
@@ -33,12 +36,10 @@ class App extends Component {
   };
 
   handleContentCloseClick = () => {
-    const { showPopup } = this.state;
     this.setState({ showPopup: false });
   };
 
   handleContentClick = param => (e) => {
-    const { clickedContent, showPopup } = this.state;
     this.setState({
       clickedContent: param,
       showPopup: true,
@@ -59,7 +60,7 @@ class App extends Component {
 
   render() {
     const {
-      currIndex, isExpanded, showPopup, list, zipCode, clickedContent,
+      currIndex, isExpanded, showPopup, list, zipcode, clickedContent,
     } = this.state;
 
     return (
@@ -67,7 +68,7 @@ class App extends Component {
         <div className="collapsible-title-inner-layout">
           <CollapsibleTitle
             isExpanded={isExpanded}
-            zipCode={zipCode}
+            zipcode={zipcode}
             toggleCollapsibleTitle={this.toggleCollapsibleTitle}
           />
           {isExpanded ? (

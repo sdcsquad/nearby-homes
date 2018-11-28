@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('newrelic');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -13,9 +14,9 @@ app.use(bodyParser.json());
 
 // send index.html when a GET request is sent to '/'
 app.use(express.static(path.join(__dirname, '../client/dist')));
+app.use('/home/:homeId', express.static(path.join(__dirname, '../client/dist')));
 
 // Use Router
-app.use('/nearbyHomes', homes);
 app.use('/api/nearbyHomes', homes);
 
 app.listen(port, () => {
