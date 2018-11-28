@@ -34,7 +34,7 @@ const wstream = fs.createWriteStream('homes.tsv');
 
 const createFakeHomes = function createFakeHomes(i) {
   /* eslint-disable */
-  for (; i < 10000002; i += 1) {
+  for (; i < 10000003; i += 1) {
     const home_id = i;
     const home_name = `home${i}`;
     /* eslint-enable */
@@ -70,7 +70,7 @@ const createFakeHomes = function createFakeHomes(i) {
     const zipCode = faker.address.zipCode('#####');
     const homeImage = selectRandomPhoto();
     /* eslint-disable */
-    if (!wstream.write(`${home_id}\t${home_name}\t${dateOfPosting}\t${status}\t${numberOfLikes}\t${numberOfBathroom}\t${numberOfBedroom}\t${homeValue}\t${sqft}\t${streetName}\t${cityName}\t${stateName}\t${zipCode}\t${homeImage}\n`)) {
+    if (!wstream.write(`${home_id}\t${home_name}\t${dateOfPosting.toISOString()}\t${status}\t${numberOfLikes}\t${numberOfBathroom}\t${numberOfBedroom}\t${homeValue}\t${sqft}\t${streetName}\t${cityName}\t${stateName}\t${zipCode}\t${homeImage}\n`)) {
       wstream.once('drain', () => createFakeHomes(i + 1));
       /* eslint-enable */
       return;

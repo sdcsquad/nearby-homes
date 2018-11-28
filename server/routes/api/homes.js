@@ -5,23 +5,24 @@ const { PlainTextAuthProvider } = cassandra.auth;
 const client = new cassandra.Client({ contactPoints: ['127.0.0.1'], keyspace: 'neighborhood', authProvider: new PlainTextAuthProvider('cassandra', 'cassandra') });
 const router = express.Router();
 
-router.get('/:homeId', (req, res) => {
-  let id;
-  const homeIdString = req.params.homeId.toString();
-  if (homeIdString.slice(0, 4).toLowerCase() === 'home') {
-    const homeIdNum = Number.parseInt(homeIdString.slice(4), 10);
-    if (homeIdNum > 0 && homeIdNum <= 10000001) {
-      id = homeIdNum;
-    } else {
-      id = null;
+const parseHomeAndCheckRange = (string) => {
+  if (string.slice(0, 4).toLowerCase() === 'home') {
+    const num = Number.parseInt(string.slice(4), 10)
+    if (num > 0 && num < 10000002) {
+      return num;
     }
-  } else if (Number.parseInt(req.params.homeId, 10) > 0
-    && Number.parseInt(req.params.homeId, 10) <= 10000002) {
-    id = Number.parseInt(req.params.homeId, 10);
-  } else {
-    id = null;
+    return null;
   }
-  if (id !== null) {
+  const num = Number.parseInt(string, 10);
+  if (num > 0 && num < 10000002) {
+    return num;
+  }
+  return null;
+};
+
+router.get('/:homeId', (req, res) => {
+  const id = parseHomeAndCheckRange(req.params.homeId.toString());
+  if (id) {
     const query = 'SELECT * FROM neighborhood.homes where home_id = ?';
     return client.execute(query, [id], { prepare: true })
       .then((result) => {
@@ -59,21 +60,7 @@ router.post('/', (req, res) => {
 
 router.put('/:homeId', (req, res) => {
   const { body } = { body: req.body };
-  let id;
-  const homeIdString = req.params.homeId.toString();
-  if (homeIdString.slice(0, 4).toLowerCase() === 'home') {
-    const homeIdNum = Number.parseInt(homeIdString.slice(4), 10);
-    if (homeIdNum > 0 && homeIdNum <= 10000001) {
-      id = homeIdNum;
-    } else {
-      id = null;
-    }
-  } else if (Number.parseInt(req.params.homeId, 10) > 0
-    && Number.parseInt(req.params.homeId, 10) <= 10000002) {
-    id = Number.parseInt(req.params.homeId, 10);
-  } else {
-    id = null;
-  }
+  const id = parseHomeAndCheckRange(req.params.homeId.toString());
   if (id === null) {
     res.status(404).json('No home found with that ID');
   }
@@ -96,21 +83,7 @@ router.put('/:homeId', (req, res) => {
 });
 
 router.delete('/:homeId', (req, res) => {
-  let id;
-  const homeIdString = req.params.homeId.toString();
-  if (homeIdString.slice(0, 4).toLowerCase() === 'home') {
-    const homeIdNum = Number.parseInt(homeIdString.slice(4), 10);
-    if (homeIdNum > 0 && homeIdNum <= 10000001) {
-      id = homeIdNum;
-    } else {
-      id = null;
-    }
-  } else if (Number.parseInt(req.params.homeId, 10) > 0
-    && Number.parseInt(req.params.homeId, 10) <= 10000002) {
-    id = Number.parseInt(req.params.homeId, 10);
-  } else {
-    id = null;
-  }
+  const id = parseHomeAndCheckRange(req.params.homeId.toString());
   if (id === null) {
     res.status(404).json('No home found with that ID');
   }

@@ -27,3 +27,4 @@ dist/bundle.js
 *.env
 *.tsv
 *.csv
+*.pem
