@@ -1,8 +1,23 @@
 const express = require('express');
 const cassandra = require('cassandra-driver');
 
-const { PlainTextAuthProvider } = cassandra.auth;
-const client = new cassandra.Client({ contactPoints: ['127.0.0.1'], keyspace: 'neighborhood', authProvider: new PlainTextAuthProvider('cassandra', 'cassandra') });
+const { types: distance } = cassandra;
+
+const options = {
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  contactPoints: [
+    process.env.DB_CONTACT,
+  ],
+  keyspace: process.env.DB_KEYSPACE,
+  pooling: {
+    setMaxRequestsPerConnection: {
+      [distance.local]: 32768,
+      [distance.remote]: 2048,
+    },
+  },
+};
+const client = new cassandra.Client(options);
 const router = express.Router();
 
 const parseHomeAndCheckRange = (string) => {
