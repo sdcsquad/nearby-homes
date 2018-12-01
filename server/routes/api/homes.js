@@ -20,9 +20,19 @@ const options = {
 const client = new cassandra.Client(options);
 const router = express.Router();
 
+const padToZip = (string) => {
+  let num = string;
+  if (string.length < 5) {
+    while (num.length < 5) {
+      num = `0${num}`;
+    }
+  }
+  return num;
+};
+
 const parseHomeAndCheckRange = (string) => {
   if (string.slice(0, 4).toLowerCase() === 'home') {
-    const num = Number.parseInt(string.slice(4), 10)
+    const num = Number.parseInt(string.slice(4), 10);
     if (num > 0 && num < 10000002) {
       return num;
     }
@@ -38,23 +48,23 @@ const parseHomeAndCheckRange = (string) => {
 router.get('/:homeId', (req, res) => {
   const id = parseHomeAndCheckRange(req.params.homeId.toString());
   if (id) {
-    const query = 'SELECT * FROM neighborhood.homes where home_id = ?';
-    return client.execute(query, [id], { prepare: true })
+    const query = 'SELECT zipcode FROM neighborhood.homes where home_id = ?';
+    client.execute(query, [id], { prepare: true })
       .then((result) => {
-        const singleHome = result.rows[0];
-        const query2 = 'SELECT * FROM neighborhood.homes WHERE zipcode = ?';
-        client.execute(query2, [singleHome.zipcode], { prepare: true })
+        const singleZip = result.rows[0].zipcode;
+        const query2 = 'SELECT * FROM neighborhood.homes WHERE zipcode = ? LIMIT 10';
+        client.execute(query2, [singleZip], { prepare: true })
           .then((newResult) => {
             const arr = [];
-            for (let i = 0; i < 15; i += 1) {
+            for (let i = 0; i < newResult.rows.length; i += 1) {
               if (newResult.rows[i].home_id !== id) {
                 arr.push(newResult.rows[i]);
               }
             }
             if (arr.length <= 1) {
-              return res.status(404).json({ noHomeFound: 'No home found with that ID' });
+              res.status(404).json({ noHomeFound: 'No home found with that ID' });
             }
-            return res.status(200).json(arr);
+            res.status(200).json(arr);
           })
           .catch((err) => {
             console.log(err);
@@ -64,7 +74,7 @@ router.get('/:homeId', (req, res) => {
         console.log(err);
       });
   }
-  return res.status(404).json('No home found with that ID');
+  res.status(404).json('No home found with that ID');
 });
 
 router.post('/', (req, res) => {
